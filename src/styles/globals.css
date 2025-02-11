@@ -1,0 +1,21 @@
+
+:root {
+  --text-color: #000000;
+  --bg-color: #ffffff;
+  --border-color: #d1d5db;
+  --primary-color: #10b981;
+  --primary-hover-color: #059669;
+  --secondary-color: #3b82f6;
+  --secondary-hover-color: #2563eb;
+  --danger-color: #ef4444;
+  --danger-hover-color: #dc2626;
+  --gray-color: #d1d5db;
+  --gray-hover-color: #9ca3af;
+}
+
+body {
+  color: var(--text-color);
+  background-color: var(--bg-color);
+}
+
+/* Add other global styles here */
