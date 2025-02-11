@@ -5,39 +5,62 @@ const API_URL = "http://localhost:3000/ports"; // JSON server URL
 export default async function handler(req, res) {
   const { method } = req;
 
-if (method === "GET") {
+  if (method === "GET") {
     try {
-        const { q, lastUpdatedFrom, lastUpdatedTo, page = 1, limit = 10 } = req.query;
-        const response = await axios.get(API_URL, { params: req.query });
-        let data = response.data;
+      const { q, lastUpdatedFrom, lastUpdatedTo, _page = 1, _limit = 10, _sort, _order, country, city } = req.query;
+      const response = await axios.get(API_URL);
+      let data = response.data;
 
-        if (q) {
-            data = data.filter(item =>
-                Object.values(item).some(value =>
-                    value.toString().toLowerCase().includes(q.toLowerCase())
-                )
-            );
-        }
-        if (lastUpdatedFrom) {
-            data = data.filter(item => new Date(item.lastUpdated) >= new Date(lastUpdatedFrom));
-        }
+      // Apply search filter
+      if (q) {
+        data = data.filter(item =>
+          Object.values(item).some(value =>
+            value.toString().toLowerCase().includes(q.toLowerCase())
+          )
+        );
+      }
 
-        if (lastUpdatedTo) {
-            data = data.filter(item => new Date(item.lastUpdated) <= new Date(lastUpdatedTo));
-        }
+      // Apply date filters
+      if (lastUpdatedFrom) {
+        data = data.filter(item => new Date(item.lastUpdated) >= new Date(lastUpdatedFrom));
+      }
 
-        const totalItems = data.length;
-        const totalPages = Math.ceil(totalItems / limit);
-        const startIndex = (page - 1) * limit;
-        const endIndex = startIndex + limit;
-        const paginatedData = data.slice(startIndex, endIndex);
+      if (lastUpdatedTo) {
+        data = data.filter(item => new Date(item.lastUpdated) <= new Date(lastUpdatedTo));
+      }
 
-        res.status(200).json({ data: paginatedData, totalPages });
+      // Apply country and city filters
+      if (country) {
+        data = data.filter(item => item.country.toLowerCase() === country.toLowerCase());
+      }
+
+      if (city) {
+        data = data.filter(item => item.city.toLowerCase() === city.toLowerCase());
+      }
+
+      // Apply sorting
+      if (_sort && _order) {
+        data = data.sort((a, b) => {
+          if (_order === "asc") {
+            return a[_sort] > b[_sort] ? 1 : -1;
+          } else {
+            return a[_sort] < b[_sort] ? 1 : -1;
+          }
+        });
+      }
+
+      const totalItems = data.length;
+      const totalPages = Math.ceil(totalItems / _limit);
+      const startIndex = (_page - 1) * _limit;
+      const endIndex = startIndex + _limit;
+      const paginatedData = data.slice(startIndex, endIndex);
+
+      res.status(200).json({ data: paginatedData, totalPages });
     } catch (error) {
-        console.error("Error fetching data:", error);
-        res.status(500).json({ error: "Error fetching data" });
+      console.error("Error fetching data:", error);
+      res.status(500).json({ error: "Error fetching data" });
     }
-} else if (method === "POST") {
+  } else if (method === "POST") {
     try {
       console.log("Request body:", req.body);
       const response = await axios.post(API_URL, req.body);

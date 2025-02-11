@@ -8,6 +8,18 @@ import Pagination from "../components/Pagination";
 import FilterModal from "../components/FilterModal";
 import PortFormModal from "../components/PortFormModal";
 import { Box, Button, TextField, Container, Paper, Popover, CircularProgress, Snackbar, Alert, Skeleton } from "@mui/material";
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#1976d2',
+    },
+    secondary: {
+      main: '#dc004e',
+    },
+  },
+});
 
 export default function Home() {
   const [ports, setPorts] = useState([]);
@@ -80,8 +92,6 @@ export default function Home() {
       setPage(1); // Reset to the first page when searching
     }
   };
-
-
 
   const handleSort = (field) => {
     setSort((prevSort) => ({
@@ -168,115 +178,117 @@ export default function Home() {
   const id = open ? 'simple-popover' : undefined;
 
   return (
-    <Container maxWidth={false} disableGutters>
-      <Paper elevation={3} sx={{ p: 4, mt: 4, backgroundColor: '#f5f5f5' }}>
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={4} sx={{ position: 'sticky', top: 0, zIndex: 1, backgroundColor: '#f5f5f5' }}>
-            <Box sx={{ fontSize: 24, fontWeight: 'bold', color: '#1976d2', fontFamily: 'Arial, sans-serif' }}>
-            Gloroots
-            </Box>
-          <Box display="flex" gap={2}>
-            <TextField
-              label="Search"
-              onChange={handleSearch}
-              onKeyDown={handleKeyDown}
-              value={searchLocal}
-              // disabled={loading}
-            />
-            <Button variant="outlined" color="secondary" onClick={toggleFilterModal} disabled={loading}>
-              Filter
-            </Button>
-            <Button variant="outlined" color="secondary" onClick={handlePopoverOpen} disabled={loading}>
-              Column Visibility
-            </Button>
-            <Button variant="contained" color="primary" onClick={toggleFormModal} disabled={loading}>
-              Add New
-            </Button>
-          </Box>
-        </Box>
-        <Popover
-          id={id}
-          open={open}
-          anchorEl={anchorEl}
-          onClose={handlePopoverClose}
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'right',
-          }}
-          transformOrigin={{
-            vertical: 'top',
-            horizontal: 'right',
-          }}
-        >
-          <Paper sx={{ p: 2 }}>
-            {Object.keys(columnVisibility).map((column) => (
-              <Box key={column} p={1} display="flex" alignItems="center">
-                <input
-                  disabled={column == "name"}
-                  type="checkbox"
-                  checked={columnVisibility[column]}
-                  onChange={() => handleColumnVisibilityChange(column)}
-                />
-                <span style={{ marginLeft: '8px' }}>
-                  {column.charAt(0).toUpperCase() + column.slice(1)}
-                </span>
+    <ThemeProvider theme={theme}>
+      <Container maxWidth={false} disableGutters>
+        <Paper elevation={3} sx={{ p: 4, mt: 4, backgroundColor: '#f5f5f5' }}>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={4} sx={{ position: 'sticky', top: 0, zIndex: 1, backgroundColor: '#f5f5f5' }}>
+              <Box sx={{ fontSize: 24, fontWeight: 'bold', color: '#1976d2', fontFamily: 'Arial, sans-serif' }}>
+              Gloroots
               </Box>
-            ))}
-          </Paper>
-        </Popover>
-        {loading ? (
-          <Box>
-            <Skeleton variant="rectangular" width="100%" height={50} />
-            <Skeleton variant="rectangular" width="100%" height={50} />
-            <Skeleton variant="rectangular" width="100%" height={50} />
-          </Box>
-        ) : (
-          <>
-              <PortTable
-                ports={Array.isArray(ports) ? ports : []}
-                handleEdit={handleEdit}
-                deletePort={async (id) => {
-                  setLoading(true);
-                  try {
-                    await deletePort(id);
-                    setToast({ open: true, message: "Port deleted successfully", severity: "success" });
-                    fetchPorts(); // Refresh the ports list
-                  } catch (error) {
-                    setToast({ open: true, message: "Error occurred", severity: "error" });
-                  }
-                  setLoading(false);
-                }}
-                handleSort={handleSort}
-                columnVisibility={columnVisibility}
+            <Box display="flex" gap={2}>
+              <TextField
+                label="Search"
+                onChange={handleSearch}
+                onKeyDown={handleKeyDown}
+                value={searchLocal}
+                // disabled={loading}
               />
-            
-            <Pagination page={page} totalPages={totalPages} handlePageChange={handlePageChange} />
-          </>
+              <Button variant="outlined" color="secondary" onClick={toggleFilterModal} disabled={loading}>
+                Filter
+              </Button>
+              <Button variant="outlined" color="secondary" onClick={handlePopoverOpen} disabled={loading}>
+                Column Visibility
+              </Button>
+              <Button variant="contained" color="primary" onClick={toggleFormModal} disabled={loading}>
+                Add New
+              </Button>
+            </Box>
+          </Box>
+          <Popover
+            id={id}
+            open={open}
+            anchorEl={anchorEl}
+            onClose={handlePopoverClose}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'right',
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+          >
+            <Paper sx={{ p: 2 }}>
+              {Object.keys(columnVisibility).map((column) => (
+                <Box key={column} p={1} display="flex" alignItems="center">
+                  <input
+                    disabled={column == "name"}
+                    type="checkbox"
+                    checked={columnVisibility[column]}
+                    onChange={() => handleColumnVisibilityChange(column)}
+                  />
+                  <span style={{ marginLeft: '8px' }}>
+                    {column.charAt(0).toUpperCase() + column.slice(1)}
+                  </span>
+                </Box>
+              ))}
+            </Paper>
+          </Popover>
+          {loading ? (
+            <Box>
+              <Skeleton variant="rectangular" width="100%" height={50} />
+              <Skeleton variant="rectangular" width="100%" height={50} />
+              <Skeleton variant="rectangular" width="100%" height={50} />
+            </Box>
+          ) : (
+            <>
+                <PortTable
+                  ports={Array.isArray(ports) ? ports : []}
+                  handleEdit={handleEdit}
+                  deletePort={async (id) => {
+                    setLoading(true);
+                    try {
+                      await deletePort(id);
+                      setToast({ open: true, message: "Port deleted successfully", severity: "success" });
+                      fetchPorts(); // Refresh the ports list
+                    } catch (error) {
+                      setToast({ open: true, message: "Error occurred", severity: "error" });
+                    }
+                    setLoading(false);
+                  }}
+                  handleSort={handleSort}
+                  columnVisibility={columnVisibility}
+                />
+              
+              <Pagination page={page} totalPages={totalPages} handlePageChange={handlePageChange} />
+            </>
+          )}
+        </Paper>
+        {filterModalVisible && (
+          <FilterModal
+            filters={filters}
+            handleFilterChange={handleFilterChange}
+            applyFilters={applyFilters}
+            resetFilters={resetFilters}
+            closeModal={toggleFilterModal}
+            uniqueValues={uniqueValues}
+          />
         )}
-      </Paper>
-      {filterModalVisible && (
-        <FilterModal
-          filters={filters}
-          handleFilterChange={handleFilterChange}
-          applyFilters={applyFilters}
-          resetFilters={resetFilters}
-          closeModal={toggleFilterModal}
-          uniqueValues={uniqueValues}
-        />
-      )}
-      {formModalVisible && (
-        <PortFormModal
-          newPort={newPort}
-          handleInputChange={handleInputChange}
-          handleCreateOrUpdate={handleCreateOrUpdate}
-          editingPort={editingPort}
-          closeModal={toggleFormModal}
-        />
-      )}
-      <Snackbar open={toast.open} autoHideDuration={6000} onClose={() => setToast({ ...toast, open: false })}>
-        <Alert onClose={() => setToast({ ...toast, open: false })} severity={toast.severity} sx={{ width: '100%' }}>
-          {toast.message}
-        </Alert>
-      </Snackbar>
-    </Container>
+        {formModalVisible && (
+          <PortFormModal
+            newPort={newPort}
+            handleInputChange={handleInputChange}
+            handleCreateOrUpdate={handleCreateOrUpdate}
+            editingPort={editingPort}
+            closeModal={toggleFormModal}
+          />
+        )}
+        <Snackbar open={toast.open} autoHideDuration={6000} onClose={() => setToast({ ...toast, open: false })}>
+          <Alert onClose={() => setToast({ ...toast, open: false })} severity={toast.severity} sx={{ width: '100%' }}>
+            {toast.message}
+          </Alert>
+        </Snackbar>
+      </Container>
+    </ThemeProvider>
   );
 }
